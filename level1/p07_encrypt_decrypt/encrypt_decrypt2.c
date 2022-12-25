@@ -1,35 +1,42 @@
 #include<stdio.h>
 #include<string.h>
+//'A' = 65 'Z' = 90 'a' = 97 'z' = 122
 char s[100005];
-void convert(char str[],int len){
-    for (int i=0;i<len;i++){
-        int asc = (int)str[i];
-        switch (asc/10)
-        {
-        case 6:case 7:case 8:
-            asc -= 'A';
-            asc = (asc + 15) % 26 + 'A';
-            str[i] = char(asc);
-            break;
-        case 9:case 10:case 11:
-            asc -= 'a';
-            asc = (asc + 15) % 26 + 'A';
-            str[i] = char(asc);
-        default:
-            break;
+void encode(char str[],int n){
+    for (int i=0;i<strlen(str);i++){
+        if (str[i]>=65 && str[i]<=90){
+            str[i] -= 'A';
+            str[i] = (str[i] + n) % 26 + 'A';
+        }else if (str[i]>=97 && str[i]<=122){
+            str[i] -= 'a';
+            str[i] = (str[i] + n) % 26 + 'a';
+        }
+    }
+}
+void decode(char str[],int n){
+    for (int i=0;i<strlen(str);i++){
+        
+        if (str[i]>=65 && str[i]<=90){
+            str[i] -= 'A';
+            int temp = str[i] - n;
+            if (temp < 0)
+                temp += 26;
+            str[i] = temp % 26 + 'A';
+        }else if (str[i]>=97 && str[i]<=122){
+            str[i] -= 'a';
+            int temp = str[i] - n;
+            if (temp < 0)
+                temp += 26;
+            str[i] = temp % 26 + 'a';
         }
     }
 }
 int main(){
-    char c;
-    int cnt=0;
-    printf("enter a string that end with ' ':");
-    do{
-        scanf("%c",&c);
-        if (c != ' ')
-        s[cnt++] = c;
-    } while (c!=' ');
-    convert(s[105],cnt);
-    for (int i=0;i<cnt;i++) printf("%c",s[i]);
+    printf("enter a string:\n");
+    scanf("%s",s);
+    encode(s,14);
+    printf("encoded:%s\n",s);
+    decode(s,14);
+    printf("decoded:%s\n",s);
     return 0;
-}223+
+}

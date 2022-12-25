@@ -1,4 +1,5 @@
 #include<stdio.h>
+#include<malloc.h>
 #define SIZE 100
 int head;
 int stack[SIZE+5];

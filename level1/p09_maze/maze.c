@@ -10,6 +10,7 @@ void prtmap(){
         printf("\n");
     }
 }
+
 int main(){
 //    freopen("map.txt","r",stdin);
     printf("enter your map size:(i*j)");
@@ -21,8 +22,8 @@ int main(){
             scanf("%c",&map[i][j]);
             printf("[%d][%d] = '%c'\n",i,j,map[i][j]);
             if (map[i][j] == '*'){
-                x = i;
-                y = j;
+                x = j;
+                y = i;
             }
         }
     }
@@ -30,17 +31,18 @@ int main(){
     {
         char command;
         prtmap();
+        printf("Now your position is (%d,%d)",x,y);
         printf("\nYour command:(wsad)\n");
         getchar();
-        scanf("%c",&command);
+        scanf("\n%c",&command);
         switch (command)
         {
         case 119:// 'w'
-            if (y>0 && map[x][y-1] != '#' && map[x][y-1] != '$'){
-                map[x][y] = '.';
+            if (y>0 && map[y-1][x] != '#' && map[y-1][x] != '$'){
+                map[y][x] = '.';
                 y --;
-                map[x][y-1] = '*';
-            }else if (map[x][y-1] != '#'){
+                map[y][x] = '*';
+            }else if (map[y-1][x] == '#'){
                 printf("invalid operation:hitwall\n");
             }else if (!y){
                 printf("invalid operation:outofborder\n");
@@ -50,13 +52,13 @@ int main(){
             }
             break;
         case 115:// 's'
-            if (y<width && map[x][y+1] != '#' && map[x][y+1] != '$'){
-                map[x][y] = '.';
+            if (y<width-1 && map[y+1][x] != '#' && map[y+1][x] != '$'){
+                map[y][x] = '.';
                 y ++;
-                map[x][y+1] = '*';
-            }else if (map[x][y+1] != '#'){
+                map[y][x] = '*';
+            }else if (map[y+1][x] == '#'){
                 printf("invalid operation:hitwall\n");
-            }else if (y == width){
+            }else if (y == width-1){
                 printf("invalid operation:outofborder\n");
             }else{
                 printf("You've win!\n");
@@ -64,11 +66,11 @@ int main(){
             }
             break;
         case 97:// 'a'
-            if (x>0 && map[x-1][y] != '#' && map[x-1][y] != '$'){
-                map[x][y] = '.';
+            if (x>0 && map[y][x-1] != '#' && map[y][x-1] != '$'){
+                map[y][x] = '.';
                 x --;
-                map[x][y] = '*';
-            }else if (map[x-1][y] != '#'){
+                map[y][x] = '*';
+            }else if (map[x-1][y] == '#'){
                 printf("invalid operation:hitwall\n");
             }else if (!x){
                 printf("invalid operation:outofborder\n");
@@ -78,13 +80,13 @@ int main(){
             }
             break;
         case 100:// 'd'
-            if (x<length && map[x+1][y] != '#' && map[x+1][y] != '$'){
-                map[x][y] = '.';
+            if (x<length-1 && map[y][x+1] != '#' && map[y][x+1] != '$'){
+                map[y][x] = '.';
                 x ++;
-                map[x][y] = '*';
-            }else if (map[x-1][y] != '#'){
+                map[y][x] = '*';
+            }else if (map[y][x+1] == '#'){
                 printf("invalid operation:hitwall\n");
-            }else if (!x){
+            }else if (x == length-1){
                 printf("invalid operation:outofborder\n");
             }else{
                 printf("You've win!\n");
