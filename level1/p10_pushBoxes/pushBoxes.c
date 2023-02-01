@@ -2,39 +2,36 @@
 #include<stdlib.h>
 #include<stdbool.h>
 #include<conio.h>
+#include<string.h>
 #define W 0
 #define S 1
 #define A 2
 #define D 3
-char map[5][6] = {
-    {'#','#','#','#','#','#'},
-    {' ',' ',' ',' ',' ','#'},
-    {' ',' ','*','$',' ','#'},
-    {' ',' ',' ','@',' ','#'},
-    {' ',' ',' ',' ',' ','#'},
-};
-int length=6,width=5,boxes=1,boxes_in_place=0,des=1,x=1,y=2,person;
+char map[255][255];
+char name[255];
+int length,width,boxes,boxes_in_place,des,x,y,person,step;
 int direction[4][2]={{-1,0}/*w*/,{1,0}/*s*/,{0,-1}/*a*/,{0,1}/*d*/};//1:WASD(direction);2:x,y decisive expression
 bool withinBorder(int x,int y);
 void prtmap();
 void readmap();
-void createMap(int length,int width);
+void createMap();
 bool ifMapOK();
-bool movable(int dir,int step);
+int movable(int dir,int step);
 void swap(char *a,char *b);
 void aMove2b(char *pos,char *destination);
 void move(int dir);
 bool judge();
 int main(){
 //    freopen("map.in","r",stdin);
-//    readmap();
+    readmap();
+    createMap();
     if (!ifMapOK()){
         printf("error:illegalMap\n");
+        _getch();
         return 0;
     }
-//    createMap(length,width);
+    prtmap();
     while(1){
-        prtmap();
         printf("Your command:");
         char command = getch();
         printf("%c",command);
@@ -56,35 +53,62 @@ int main(){
                 printf("move:right\n");    
                 break;
             default:
-                printf("invalidOperation\n");
+                printf("\nAre you sure to reset?\nPress 'y' to commit:");
+                if (getch() == 'y'){
+                    createMap();
+                    step = 0;
+                    printf("Map has been reset!\n");
+                }
                 break;
+        }
+        prtmap();
+        if (judge()){
+            prtmap();
+            printf("You win! Steps:%d\nPress any key to exit...\n",step);
+            _getch();
+            return 0;
         }
     }
 }
-bool withinBorder(int x,int y){
+bool withinBorder(int x, int y)
+{
     return (x>=0 && x<length && y >= 0 && y< width);
 }
 void prtmap(){
-//    system("cls");
-    printf("pos:X:%d Y:%d\n",x+1,y+1);
+    system("cls");
+    printf("pos:X:%d Y:%d step = %d\nwasd to move(others to reset)\n",x+1,y+1,step);
     for (int j=0;j<width;j++){
         for (int i=0;i<length;i++){
             printf("%c",map[j][i]);
         }
         printf("\n");
     }
+    printf("' ' = way\n# = wall\n* = your position\n$ = box\n@ = destination\n%% = box in des\n& = you in des\n");
 }
 void readmap(){
-    printf("enter your map size:(i*j)");
-    scanf("%d%d",&length,&width);
-    printf("ENTER YOUR MAP:(without borders)\n' ' = way\n# = wall\n* = your position\n$ = box\n@ = destination\n%% = box in des\n& = you in des:");
+    printf("Please enter the name of the map:");
+    scanf("%s",name);
+    strcat(name,".txt");
+}
+void createMap(){
+    FILE *fp = fopen(name,"r");
+    if (fp == NULL) {
+        printf("error:Failed2LoadMap\n");
+        return;
+    }
+    fscanf(fp,"%d %d\n",&length,&width);
+    printf("length:%d width:%d\n",length,width);
     for (int j=0;j<width;j++){
-        getchar();
         for (int i=0;i<length;i++){
-            scanf("%c",&map[j][i]);
-            printf("[%d][%d] = '%c'\n",j,i,map[j][i]);
-            switch (map[j][i]){
+            char temp = fgetc(fp);
+            printf("Read[%d %d]:%c\n",j,i,temp);
+            map[j][i] = temp;
+            switch (temp){
             case '*':
+                x = i;
+                y = j;
+                person++;
+                break;
             case '&':
                 x = i;
                 y = j;
@@ -104,35 +128,29 @@ void readmap(){
                 break;
             }
         }
+        fgetc(fp);
     }
-    system("pause");
+    fclose(fp);
 }
-void createMap(int length,int width){
-    for (int i=0;i<width;i++){
-        for (int j=0;j<length;j++){
-            scanf("%c",&map[j][i]);
-        }
-        getchar();
-    }
-}
+
 bool ifMapOK(){
     return (person == 1 || boxes + boxes_in_place == des);
 }
-bool movable(int dir,int step){
+int movable(int dir,int step){
     int moveX = x + step * direction[dir][1], moveY = y + step * direction[dir][0];
     if (!withinBorder(moveX,moveY)) {
         printf("move:outofBorder\n");
-        return false;
+        return 0;
     }
     switch (map[moveY][moveX]){
         case '#':
             printf("movable:false-wall\n");
-            return false;
+            return 0;
         case '$':
         case '%':
             return movable(dir,step+1);
         default:
-            return true;
+            return step;
     }
 }
 void swap(char *a,char *b){
@@ -196,8 +214,8 @@ void aMove2b(char *pos,char *destination){
     case '&':
         switch (*destination){
         case ' ':
-            *pos = ' ';
-            *destination = '%';
+            *pos = '@';
+            *destination = '*';
             break;
         case '@':
             swap(pos,destination);
@@ -214,24 +232,17 @@ void aMove2b(char *pos,char *destination){
     }
 }
 void move(int dir){
-    int step = 1;
-    if (movable(dir,step)){
-        int moveY = y+step*direction[dir][0],moveX = x+step*direction[dir][1];
-        char pos = map[moveY][moveX];
-        while(pos != ' ' && pos != '@'){
-            step++;
-        }
-        printf("Move:step=%d\n",step);
-        for (;step>0;step--){
-            moveY = y+step*direction[dir][0];
-            moveX = x+step*direction[dir][1];
-            pos = map[moveY][moveX];
-            aMove2b(&map[y+(step-1)*direction[dir][0]][x+(step-1)*direction[dir][1]],&pos);
-        }
+    printf("I am moving in MOVE now!,dir = %d\n",dir);
+    int tstep = movable(dir,1);
+    if (tstep){
+        step++;
+        printf("Move:step=%d\n",tstep);
+        for (;tstep>0;tstep--)
+            aMove2b(&map[y+(tstep-1)*direction[dir][0]][x+(tstep-1)*direction[dir][1]],&map[y+tstep*direction[dir][0]][x+tstep*direction[dir][1]]);
         y += direction[dir][0];
         x += direction[dir][1]; 
     }else{
-        printf("error:illegalMove\n");
+        printf("error:illegalMove(void move)\n");
     }
 }
 bool judge(){

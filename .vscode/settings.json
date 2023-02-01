@@ -10,6 +10,10 @@
         "iosfwd": "c",
         "limits": "c",
         "exception": "c",
-        "istream": "c"
+        "istream": "c",
+        "array": "c",
+        "initializer_list": "c",
+        "utility": "c",
+        "iostream": "cpp"
     }
 }
